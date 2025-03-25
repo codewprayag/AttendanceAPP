@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Team Prayag Attendance</title>
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #e3f2fd;
+            text-align: center;
+        }
+        .container {
+            max-width: 700px;
+            margin: 50px auto;
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
+        }
+        h1 {
+            color: #007bff;
+            font-size: 28px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        table, th, td {
+            border: 1px solid #007bff;
+        }
+        th, td {
+            padding: 12px;
+            text-align: center;
+            font-size: 16px;
+        }
+        th {
+            background-color: #007bff;
+            color: white;
+        }
+        button {
+            padding: 12px 18px;
+            margin-top: 15px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: 0.3s;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        button:disabled {
+            background-color: grey;
+            cursor: not-allowed;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Team Prayag Attendance</h1>
+        <button id="enableAttendance" onclick="enableAttendance()">Allow Attendance for Today</button>
+        <table>
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Attendance</th>
+                    <th>Date & Time</th>
+                </tr>
+            </thead>
+            <tbody id="attendanceTable">
+                <tr><td>Bibek</td><td><input type="checkbox" class="attendance" disabled></td><td class="timestamp"></td></tr>
+                <tr><td>Animesh</td><td><input type="checkbox" class="attendance" disabled></td><td class="timestamp"></td></tr>
+                <tr><td>Pukar</td><td><input type="checkbox" class="attendance" disabled></td><td class="timestamp"></td></tr>
+                <tr><td>Pritishma</td><td><input type="checkbox" class="attendance" disabled></td><td class="timestamp"></td></tr>
+                <tr><td>Avishek</td><td><input type="checkbox" class="attendance" disabled></td><td class="timestamp"></td></tr>
+            </tbody>
+        </table>
+        <button id="saveBtn" onclick="saveAttendance()" disabled>Save Attendance</button>
+    </div>
+
+    <script>
+        function enableAttendance() {
+            document.querySelectorAll(".attendance").forEach(input => input.disabled = false);
+            document.getElementById("saveBtn").disabled = false;
+            document.getElementById("enableAttendance").disabled = true;
+        }
+
+        function saveAttendance() {
+            let attendanceData = "Name,Attendance,Date & Time\n";
+            let rows = document.querySelectorAll("#attendanceTable tr");
+            let currentDate = new Date().toLocaleString();
+            
+            rows.forEach(row => {
+                let name = row.cells[0].innerText;
+                let isChecked = row.cells[1].querySelector("input").checked ? "Present" : "Absent";
+                let timestampCell = row.cells[2];
+                
+                if (isChecked === "Present") {
+                    timestampCell.innerText = currentDate;
+                }
+                attendanceData += `${name},${isChecked},${timestampCell.innerText}\n`;
+            });
+            
+            let blob = new Blob([attendanceData], { type: 'text/csv' });
+            let link = document.createElement('a');
+            link.href = window.URL.createObjectURL(blob);
+            link.download = 'attendance.csv';
+            link.click();
+            alert("Attendance Saved and Downloaded as CSV!");
+        }
+    </script>
+</body>
+</html>
