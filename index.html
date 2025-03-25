@@ -9,51 +9,53 @@
             font-family: 'Poppins', sans-serif;
             margin: 0;
             padding: 0;
-            background-color: #e3f2fd;
+            background: url('https://www.heraldcollege.edu.np/uploads/herald-college-kathmandu.jpg') no-repeat center center fixed;
+            background-size: cover;
             text-align: center;
+            color: white;
         }
         .container {
-            max-width: 700px;
+            max-width: 800px;
             margin: 50px auto;
-            background: white;
+            background: rgba(0, 0, 50, 0.8);
             padding: 30px;
             border-radius: 12px;
-            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.5);
         }
         h1 {
-            color: #007bff;
-            font-size: 28px;
+            color: #00bfff;
+            font-size: 32px;
         }
         table {
             width: 100%;
             border-collapse: collapse;
             margin-top: 20px;
+            background: rgba(255, 255, 255, 0.2);
         }
         table, th, td {
-            border: 1px solid #007bff;
+            border: 1px solid #00bfff;
         }
         th, td {
-            padding: 12px;
+            padding: 14px;
             text-align: center;
-            font-size: 16px;
+            font-size: 18px;
+            color: white;
         }
         th {
-            background-color: #007bff;
-            color: white;
+            background-color: #00bfff;
         }
         button {
-            padding: 12px 18px;
-            margin-top: 15px;
-            background-color: #007bff;
+            padding: 12px 16px;
+            background-color: #00bfff;
             color: white;
             border: none;
-            border-radius: 6px;
+            border-radius: 8px;
             cursor: pointer;
             font-size: 16px;
             transition: 0.3s;
         }
         button:hover {
-            background-color: #0056b3;
+            background-color: #0080ff;
         }
         button:disabled {
             background-color: grey;
@@ -71,48 +73,64 @@
                     <th>Name</th>
                     <th>Attendance</th>
                     <th>Date & Time</th>
+                    <th>Save</th>
                 </tr>
             </thead>
             <tbody id="attendanceTable">
-                <tr><td>Bibek</td><td><input type="checkbox" class="attendance" disabled></td><td class="timestamp"></td></tr>
-                <tr><td>Animesh</td><td><input type="checkbox" class="attendance" disabled></td><td class="timestamp"></td></tr>
-                <tr><td>Pukar</td><td><input type="checkbox" class="attendance" disabled></td><td class="timestamp"></td></tr>
-                <tr><td>Pritishma</td><td><input type="checkbox" class="attendance" disabled></td><td class="timestamp"></td></tr>
-                <tr><td>Avishek</td><td><input type="checkbox" class="attendance" disabled></td><td class="timestamp"></td></tr>
+                <tr><td>Bibek</td><td><select class="attendance" disabled><option value="">Select</option><option value="Present">Present</option><option value="Absent">Absent</option><option value="Late">Late</option></select></td><td class="timestamp"></td><td><button class="saveBtn" onclick="saveAttendance(this)" disabled>Save</button></td></tr>
+                <tr><td>Animesh</td><td><select class="attendance" disabled><option value="">Select</option><option value="Present">Present</option><option value="Absent">Absent</option><option value="Late">Late</option></select></td><td class="timestamp"></td><td><button class="saveBtn" onclick="saveAttendance(this)" disabled>Save</button></td></tr>
+                <tr><td>Pukar</td><td><select class="attendance" disabled><option value="">Select</option><option value="Present">Present</option><option value="Absent">Absent</option><option value="Late">Late</option></select></td><td class="timestamp"></td><td><button class="saveBtn" onclick="saveAttendance(this)" disabled>Save</button></td></tr>
+                <tr><td>Pritishma</td><td><select class="attendance" disabled><option value="">Select</option><option value="Present">Present</option><option value="Absent">Absent</option><option value="Late">Late</option></select></td><td class="timestamp"></td><td><button class="saveBtn" onclick="saveAttendance(this)" disabled>Save</button></td></tr>
+                <tr><td>Avishek</td><td><select class="attendance" disabled><option value="">Select</option><option value="Present">Present</option><option value="Absent">Absent</option><option value="Late">Late</option></select></td><td class="timestamp"></td><td><button class="saveBtn" onclick="saveAttendance(this)" disabled>Save</button></td></tr>
             </tbody>
         </table>
-        <button id="saveBtn" onclick="saveAttendance()" disabled>Save Attendance</button>
+        <!-- Done Button -->
+        <button id="doneButton" onclick="downloadCSV()" disabled>Done</button>
     </div>
 
     <script>
+        // Enable the attendance for today
         function enableAttendance() {
-            document.querySelectorAll(".attendance").forEach(input => input.disabled = false);
-            document.getElementById("saveBtn").disabled = false;
+            document.querySelectorAll(".attendance, .saveBtn").forEach(input => input.disabled = false);
             document.getElementById("enableAttendance").disabled = true;
+            document.getElementById("doneButton").disabled = false;
         }
 
-        function saveAttendance() {
-            let attendanceData = "Name,Attendance,Date & Time\n";
-            let rows = document.querySelectorAll("#attendanceTable tr");
-            let currentDate = new Date().toLocaleString();
+        // Save individual attendance data when save button is clicked
+        function saveAttendance(button) {
+            let row = button.parentElement.parentElement;
+            let name = row.cells[0].innerText;
+            let status = row.cells[1].querySelector("select").value;
+            let timestampCell = row.cells[2];
             
+            if (!status) {
+                alert("Please select an attendance status before saving.");
+                return;
+            }
+            
+            let currentTime = new Date().toLocaleString();
+            timestampCell.innerText = currentTime;
+        }
+
+        // Collect all attendance data and download it as CSV when Done button is clicked
+        function downloadCSV() {
+            let rows = document.querySelectorAll("#attendanceTable tr");
+            let csvData = "Name,Status,Date & Time\n";
+
             rows.forEach(row => {
                 let name = row.cells[0].innerText;
-                let isChecked = row.cells[1].querySelector("input").checked ? "Present" : "Absent";
-                let timestampCell = row.cells[2];
-                
-                if (isChecked === "Present") {
-                    timestampCell.innerText = currentDate;
+                let status = row.cells[1].querySelector("select").value;
+                let timestamp = row.cells[2].innerText;
+                if (status && timestamp) {
+                    csvData += `${name},${status},${timestamp}\n`;
                 }
-                attendanceData += `${name},${isChecked},${timestampCell.innerText}\n`;
             });
-            
-            let blob = new Blob([attendanceData], { type: 'text/csv' });
+
+            let blob = new Blob([csvData], { type: 'text/csv' });
             let link = document.createElement('a');
             link.href = window.URL.createObjectURL(blob);
             link.download = 'attendance.csv';
             link.click();
-            alert("Attendance Saved and Downloaded as CSV!");
         }
     </script>
 </body>
